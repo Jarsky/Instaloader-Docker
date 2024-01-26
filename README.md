@@ -5,6 +5,11 @@ The Dockerfile will grab the latest release version that is available as a relea
 
 The official Instaloader Project: https://github.com/instaloader/instaloader
 
+## Installation
+1. Clone the Repository
+2. Edit the docker-compose.yml with your environment
+3. Run ./instaloader.sh to install Instaloader and to update the docker container
+
 ## Usage
 
 For full Instaloader usage, refer to [their documentation here](https://instaloader.github.io/index.html).
