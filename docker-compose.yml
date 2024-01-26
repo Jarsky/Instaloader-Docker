@@ -1,0 +1,16 @@
+version: "3.2"
+services:
+  onlyfans:
+    image: instaloader:latest
+    container_name: instaloader
+    hostname: instaloader
+    volumes:
+      - ./config/settings.txt:/settings.txt
+      - ./config/profiles.txt:/profiles.txt
+      - ./config/session-filename:/session-filename
+      - /mnt/myshare/Instagram:/download
+    restart: "unless-stopped"
+networks:
+ default:
+   external:
+      name: myNetwork
