@@ -45,15 +45,17 @@ user2
 
 # Updating Session File & Profile List (Powershell)
 
-You're probably running your Docker on a remote server. 
-You can use the included Powershell Script on your Windows PC to remotely update these automatically. 
+You're probably running your Docker on a remote server.  
+You can use the included Powershell Script on your Windows PC to remotely update these automatically.  
 
 ## Requirements:
-    - You must be running Docker on Linux
-    - You must have Key Authentication setup for SSH (SFTP) (Key required in PPK format i.e PuTTyKeyGen)
-    - Requires 615_import_firefox_session.py
-    - Requires WinSCP installed and Windows PATH configured
-    - Firefox Browser
+```
+You must be running Docker on Linux
+You must have Key Authentication setup for SSH (SFTP) (Key required in PPK format i.e PuTTyKeyGen)
+Requires 615_import_firefox_session.py
+Requires WinSCP installed and Windows PATH configured
+Firefox Browser
+```
 
 ## Usage:
 
