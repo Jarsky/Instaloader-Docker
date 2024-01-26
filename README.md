@@ -64,3 +64,5 @@ Ensure you have all the requirements
 Right click the script and edit the Variables section  
 **Do not edit below the variables unless you know what you're doing**   
 Run the Powershell script to update your sessions file and/or profile list  
+
+![InstaloaderPS](https://i.imgur.com/CZYr9xf.png)
