@@ -31,6 +31,7 @@ $hostKey = "ssh-ed25519 255 myhosthash"
 $logFilePath = "C:\temp\winscp.log"
 $remotePath = "/opt/instaloader/config"
 $sftpUrl = "sftp://user@myftpserver.com"
+$profilesFile = "profiles.txt"
 
 # Functions
 function Start-Firefox {
@@ -99,18 +100,44 @@ function Invoke-WinSCPTransfer {
 	}
 }
 
+function Invoke-ProfileUpdate {
+        $winscpScript = @"
+        option batch abort
+        option confirm off
+        open $sftpUrl -privatekey="$privateKeyPath" -hostkey="$hostKey"
+        put "$localProfilesPath" "$remotePath/$profilesFile"
+        exit
+"@
+
+        $winscpScriptPath = [System.IO.Path]::GetTempFileName()
+        $winscpScript | Out-File -FilePath $winscpScriptPath -Encoding utf8
+
+        Start-Process -FilePath "winscp.com" -ArgumentList "/ini=nul /log=`"$logFilePath`" /script=`"$winscpScriptPath`"" -Wait
+
+        if (-not $?) {
+            Write-Host "[ERROR] There was an error while updating the profiles list on the server. Check the log at $logFilePath"
+            Pause
+            Exit 1
+        }
+
+        Remove-Item -Path $localProfilesPath -Force
+        Write-Host "[INFO] Profiles list updated successfully."
+        $updateProfiles = Read-Host "Do you want to update the list of profiles (Y/n)?"
+		Write-Host "[INFO] No more updates to profiles list."
+}
+
 function Update-ProfilesList {
     $updateProfiles = "Y"
 
     while ($updateProfiles -eq "Y" -or $updateProfiles -eq "y") {
         Write-Host "[INFO] Updating profiles list..."
         
-        $localProfilesPath = "$env:TEMP\profiles.txt"
+        $localProfilesPath = "$env:TEMP\$profilesFile"
         $winscpScript = @"
         option batch abort
         option confirm off
         open $sftpUrl -privatekey="$privateKeyPath" -hostkey="$hostKey"
-        get "$remotePath/profiles.txt" "$localProfilesPath"
+        get "$remotePath/$profilesFile" "$localProfilesPath"
         exit
 "@
 
@@ -133,6 +160,7 @@ function Update-ProfilesList {
         if ($action -eq "1") {
             $newProfile = Read-Host "Enter the new profile name"
             Add-Content -Path $localProfilesPath -Value "$newProfile"
+			Invoke-ProfileUpdate
             Write-Host "[INFO] Profile '$newProfile' added successfully."
         }
         elseif ($action -eq "2") {
@@ -140,6 +168,7 @@ function Update-ProfilesList {
             if ($indexToRemove -ge 1 -and $indexToRemove -le $profiles.Count) {
                 $profiles = $profiles | Where-Object { $_.ReadCount -ne $indexToRemove }
                 Set-Content -Path $localProfilesPath -Value ($profiles -join "`n")
+				Invoke-ProfileUpdate
                 Write-Host "[INFO] Profile at position $indexToRemove removed successfully."
             } else {
                 Write-Host "[ERROR] Invalid selection. Please choose a valid number."
@@ -148,34 +177,12 @@ function Update-ProfilesList {
             }
         } else {
             Write-Host "[INFO] No action taken."
+			Pause
+			Exit 1
         }
-
-        $winscpScript = @"
-        option batch abort
-        option confirm off
-        open $sftpUrl -privatekey="$privateKeyPath" -hostkey="$hostKey"
-        put "$localProfilesPath" "$remotePath/profiles.txt"
-        exit
-"@
-
-        $winscpScriptPath = [System.IO.Path]::GetTempFileName()
-        $winscpScript | Out-File -FilePath $winscpScriptPath -Encoding utf8
-
-        Start-Process -FilePath "winscp.com" -ArgumentList "/ini=nul /log=`"$logFilePath`" /script=`"$winscpScriptPath`"" -Wait
-
-        if (-not $?) {
-            Write-Host "[ERROR] There was an error while updating the profiles list on the server. Check the log at $logFilePath"
-            Pause
-            Exit 1
-        }
-
-        Remove-Item -Path $localProfilesPath -Force
-        Write-Host "[INFO] Profiles list updated successfully."
-        $updateProfiles = Read-Host "Do you want to update the list of profiles (Y/n)?"
-    }
-
-    Write-Host "[INFO] No more updates to profiles list."
+	}
 }
+
 
 # Main Script
 
